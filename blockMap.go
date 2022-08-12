@@ -1,6 +1,8 @@
 package main
 
-import "math"
+import (
+	"math"
+)
 
 type BlockMap struct {
 	MapData
@@ -49,10 +51,14 @@ func (b *BlockMap) Trace(x, y, theta float64) (block Block, distance float64) {
 		blockX = x - float64(pX)
 		blockY = y - float64(pY)
 		dX     = math.Cos(theta)
-		dY     = math.Sin(theta)
+		dY     = -math.Sin(theta)
 	)
 
+	const renderDistance = 100
 	for {
+		if distance > renderDistance {
+			return Air, renderDistance
+		}
 		// If we are in a wall, return
 		if block = b.At(pX, pY); block != Air {
 			return
