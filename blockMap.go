@@ -46,15 +46,16 @@ const (
 func (b *BlockMap) Trace(x, y, theta float64) (block Block, distance float64) {
 	// Split into integer and float parts
 	var (
-		pX     = int(math.Floor(x))
-		pY     = int(math.Floor(y))
-		blockX = x - float64(pX)
-		blockY = y - float64(pY)
-		dX     = math.Cos(theta)
-		dY     = -math.Sin(theta)
+		dX = math.Cos(theta)
+		dY = -math.Sin(theta)
 	)
 
-	const renderDistance = 100
+	var (
+		pX = int(math.Floor(x))
+		pY = int(math.Floor(y))
+	)
+
+	const renderDistance = 50
 	for {
 		if distance > renderDistance {
 			return Air, renderDistance
@@ -64,47 +65,35 @@ func (b *BlockMap) Trace(x, y, theta float64) (block Block, distance float64) {
 			return
 		}
 
-		// Calculate the "wall" of the current block that we hit (divide by zero isn't handled because that just leads to infinity which is fine)
-		var nearest float64
-		var nearestDirection Direction
-		if dX < 0 {
-			nearest = blockX / -dX
-			nearestDirection = Left
-		} else {
-			nearest = (1 - blockX) / dX
-			nearestDirection = Right
-		}
-
-		if dY < 0 {
-			if n := blockY / -dY; n < nearest {
-				nearest = n
-				nearestDirection = Up
-			}
-		} else {
-			if n := (1 - blockY) / dY; n < nearest {
-				nearest = n
-				nearestDirection = Down
-			}
-		}
-		// Update coordinates
-		switch nearestDirection {
-		case Up:
-			pY -= 1
-			blockY = 1
-			blockX -= dX * nearest
-		case Down:
-			pY += 1
-			blockY = 0
-			blockX += dX * nearest
-		case Left:
-			pX -= 1
-			blockX = 1
-			blockY -= dY * nearest
-		case Right:
+		if dX > 0 {
 			pX += 1
-			blockX = 0
-			blockY += dY * nearest
 		}
-		distance += nearest
+		if dY > 0 {
+			pY += 1
+		}
+		var nearest float64
+		nearest = (float64(pX) - x) / dX
+		if nearestY := (float64(pY) - y) / dY; dY != 0 && nearestY < nearest {
+			nearest = nearestY
+			if dY < 0 {
+				pY -= 1
+			} else {
+				pY += 1
+			}
+		} else {
+			if dX < 0 {
+				pX -= 1
+			} else {
+				pX += 1
+			}
+		}
+		if dX > 0 {
+			pX -= 1
+		}
+		if dY > 0 {
+			pY -= 1
+		}
+		distance = nearest
 	}
+	return
 }
