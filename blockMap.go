@@ -95,5 +95,4 @@ func (b *BlockMap) Trace(x, y, theta float64) (block Block, distance float64) {
 		}
 		distance = nearest
 	}
-	return
 }
